@@ -6,6 +6,7 @@ import crypto from "crypto";
 
 const router = express.Router();
 const CHUNK_SIZE = 500;
+const BATCH_SIZE = 20; // Number of vectors per batch
 
 // Helper to run Python scraper and parse JSON
 const runPythonScraper = () => {
@@ -33,27 +34,34 @@ router.post("/", async (req, res) => {
 
     for (const page of pages) {
       const text = page.text;
+      const textChunks = [];
 
       // Split text into chunks
       for (let i = 0; i < text.length; i += CHUNK_SIZE) {
         const chunk = text.slice(i, i + CHUNK_SIZE);
+        const id = crypto
+          .createHash("sha256")
+          .update(page.url + i)
+          .digest("hex");
+        textChunks.push({ id, chunk, url: page.url, label: page.label });
+      }
 
-        // Create embedding
-        const embedding = await createEmbedding(chunk);
+      // Create embeddings for all chunks in parallel
+      const embeddingPromises = textChunks.map(tc => createEmbedding(tc.chunk));
+      const embeddings = await Promise.all(embeddingPromises);
 
-        // Unique ID per chunk
-        const id = crypto.createHash("sha256").update(page.url + i).digest("hex");
+      // Prepare vectors payload
+      const vectorsPayload = embeddings.map((embedding, idx) => ({
+        id: textChunks[idx].id,
+        values: embedding,
+        metadata: { url: textChunks[idx].url, label: textChunks[idx].label },
+      }));
 
-        const vectorsPayload = [
-          {
-            id,
-            values: embedding,
-            metadata: { url: page.url, label: page.label },
-          },
-        ];
-
-        await index.upsert(vectorsPayload);
-        totalInserted++;
+      // Upsert in batches
+      for (let i = 0; i < vectorsPayload.length; i += BATCH_SIZE) {
+        const batch = vectorsPayload.slice(i, i + BATCH_SIZE);
+        await index.upsert(batch);
+        totalInserted += batch.length;
       }
     }
 
