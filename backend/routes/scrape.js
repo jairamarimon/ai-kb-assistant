@@ -24,6 +24,18 @@ const runPythonScraper = () => {
   });
 };
 
+// Upsert vectors in batches
+const upsertBatches = async (index, vectors) => {
+  for (let i = 0; i < vectors.length; i += BATCH_SIZE) {
+    const batch = vectors.slice(i, i + BATCH_SIZE);
+    try {
+      await index.upsert(batch);
+    } catch (err) {
+      console.error("Batch upsert failed:", err);
+    }
+  }
+};
+
 router.post("/", async (req, res) => {
   try {
     // Initialize Pinecone
@@ -32,13 +44,11 @@ router.post("/", async (req, res) => {
     const pages = await runPythonScraper();
     let totalInserted = 0;
 
-    for (const page of pages) {
-      const text = page.text;
+    // Process all pages concurrently
+    const pagePromises = pages.map(async (page) => {
       const textChunks = [];
-
-      // Split text into chunks
-      for (let i = 0; i < text.length; i += CHUNK_SIZE) {
-        const chunk = text.slice(i, i + CHUNK_SIZE);
+      for (let i = 0; i < page.text.length; i += CHUNK_SIZE) {
+        const chunk = page.text.slice(i, i + CHUNK_SIZE);
         const id = crypto
           .createHash("sha256")
           .update(page.url + i)
@@ -46,9 +56,10 @@ router.post("/", async (req, res) => {
         textChunks.push({ id, chunk, url: page.url, label: page.label });
       }
 
-      // Create embeddings for all chunks in parallel
-      const embeddingPromises = textChunks.map(tc => createEmbedding(tc.chunk));
-      const embeddings = await Promise.all(embeddingPromises);
+      // Generate embeddings concurrently
+      const embeddings = await Promise.all(
+        textChunks.map((tc) => createEmbedding(tc.chunk))
+      );
 
       // Prepare vectors payload
       const vectorsPayload = embeddings.map((embedding, idx) => ({
@@ -57,13 +68,11 @@ router.post("/", async (req, res) => {
         metadata: { url: textChunks[idx].url, label: textChunks[idx].label },
       }));
 
-      // Upsert in batches
-      for (let i = 0; i < vectorsPayload.length; i += BATCH_SIZE) {
-        const batch = vectorsPayload.slice(i, i + BATCH_SIZE);
-        await index.upsert(batch);
-        totalInserted += batch.length;
-      }
-    }
+      await upsertBatches(index, vectorsPayload);
+      totalInserted += vectorsPayload.length;
+    });
+
+    await Promise.all(pagePromises);
 
     res.json({ success: true, inserted: totalInserted });
   } catch (err) {
