@@ -53,7 +53,7 @@ router.post("/", async (req, res) => {
           .createHash("sha256")
           .update(page.url + i)
           .digest("hex");
-        textChunks.push({ id, chunk, url: page.url, label: page.label });
+        textChunks.push({ id, chunk, parentUrl: page.url, label: page.label });
       }
 
       // Generate embeddings concurrently
@@ -65,7 +65,11 @@ router.post("/", async (req, res) => {
       const vectorsPayload = embeddings.map((embedding, idx) => ({
         id: textChunks[idx].id,
         values: embedding,
-        metadata: { url: textChunks[idx].url, label: textChunks[idx].label },
+        metadata: {
+          parentUrl: textChunks[idx].parentUrl,
+          label: textChunks[idx].label,
+          text: textChunks[idx].chunk,
+        },
       }));
 
       await upsertBatches(index, vectorsPayload);
