@@ -2,6 +2,7 @@ import express from "express";
 import initPinecone from "../services/pinecone.js";
 import { createEmbedding } from "../services/embeddings.js";
 import { createCompletion } from "../services/openai.js";
+import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
@@ -87,6 +88,25 @@ router.post("/", async (req, res) => {
     console.log("Final Answer:", answer);
 
     const sources = Array.from(parentMap.keys());
+
+    // Save chat to Supabase
+    const { data, error } = await supabase
+    .from("history")
+    .insert([
+      {
+        question: query,
+        answer,
+        sources,
+      },
+    ])
+    .select();
+    
+    if (error) {
+      console.error("Error saving chat history:", error);
+    } else {
+      console.log("Chat history saved:", data);
+    }
+
     res.json({ success: true, answer, sources });
 
   } catch (err) {
