@@ -1,0 +1,23 @@
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: slideIn 0.3s ease-out;
+}
+
+.gradient-ocean {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+}
+
+.chat-container {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}

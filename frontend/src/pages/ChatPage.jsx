@@ -1,12 +1,18 @@
 import { useState } from 'react';
-import ChatInput from '../components/ChatInput';
-import ChatMessages from '../components/ChatMessages';
-import Loader from '../components/Loader';
 import { askQuestion } from '../api/chat';
+import Background from '../components/layout/Background';
+import Header from '../components/layout/Header';
+import ChatContainer from '../components/chat/ChatContainer';
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      from: 'ai',
+      text: 'Welcome aboard! 🚢 I am your AI cruise travel assistant. Ask me anything about cruise destinations, or travel tips.',
+    },
+  ]);
+
+  const [isLoading, setLoading] = useState(false);
 
   const handleSend = async (question) => {
     if (!question.trim()) return;
@@ -21,16 +27,16 @@ export default function ChatPage() {
         setMessages((prev) => [
           ...prev,
           {
-            from: 'bot',
+            from: 'ai',
             text: data.answer,
             sources: data.sources,
           },
         ]);
       } else {
-        setMessages((prev) => [...prev, { from: 'bot', text: 'Sorry, something went wrong.' }]);
+        setMessages((prev) => [...prev, { from: 'ai', text: 'Sorry, something went wrong.' }]);
       }
     } catch (err) {
-      const errorMessage = { from: 'bot', text: 'Error: ' + err.message };
+      const errorMessage = { from: 'ai', text: 'Error: ' + err.message };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
@@ -38,24 +44,15 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
-      {/* Sidebar */}
-      <div className="hidden md:block w-64 bg-gray-100 p-4">
-        <h2 className="font-bold text-lg mb-4">History</h2>
-        {messages
-          .filter((m) => m.from === 'user')
-          .map((m, idx) => (
-            <div key={idx} className="p-2 border-b">
-              {m.text}
-            </div>
-          ))}
+    <main className="relative w-full h-screen flex flex-col items-center px-4 py-8">
+      <Background />
+      <div className="relative z-10 w-full flex flex-col items-center">
+        <Header />
+        <ChatContainer messages={messages} onSend={handleSend} isLoading={isLoading} />
+        <footer className="mt-4 text-white text-sm opacity-75">
+          Shermans Travel Cruise Knowledge Base © 2025
+        </footer>
       </div>
-
-      {/* Chat area */}
-      <div className="flex-1 flex flex-col">
-        <ChatMessages messages={messages} loading={loading} />
-        <ChatInput onSend={handleSend} disabled={loading} />
-      </div>
-    </div>
+    </main>
   );
 }
