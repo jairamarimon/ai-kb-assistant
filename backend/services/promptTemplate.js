@@ -16,7 +16,7 @@ Requirements:
 - Include main facts. Do NOT invent facts.
 - Keep it readable and logically organized
 - Merge information from multiple sources if needed.
-- Always include and cite every fact and source using the numbered sources like ([1]), ([2]), etc.]
+- Always include and cite facts inline using numbered citations [(1)](URL), [(2)](URL), etc.
 
 Follow the user’s instructions and style:
 - If the user asks for a list, output a bullet or numbered list.
