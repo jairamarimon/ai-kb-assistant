@@ -1,6 +1,6 @@
 # 🚢 Cruise Travel Assistant
 
-Welcome to **AI KB Assistant**, your friendly mini knowledge-base assistant for cruise travel! 🌊🛳️  
+Welcome to **Cruise Travel Assistant**, your friendly mini knowledge-base assistant for cruise travel! 🌊🛳️  
 
 This project lets you ask questions about cruises and destinations. Answers come straight from curated ShermansTravel pages, with related citations, and everything is powered by OpenAI, Pinecone, and Supabase.  
 
