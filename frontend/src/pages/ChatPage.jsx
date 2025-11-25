@@ -7,7 +7,7 @@ import ChatContainer from '../components/chat/ChatContainer';
 export default function ChatPage() {
   const [messages, setMessages] = useState([
     {
-      from: 'ai',
+      from: 'assistant',
       text: 'Welcome aboard! 🚢 I am your AI cruise travel assistant. Ask me anything about cruise destinations, or travel tips.',
     },
   ]);
@@ -27,16 +27,16 @@ export default function ChatPage() {
         setMessages((prev) => [
           ...prev,
           {
-            from: 'ai',
+            from: 'assistant',
             text: data.answer,
             sources: data.sources,
           },
         ]);
       } else {
-        setMessages((prev) => [...prev, { from: 'ai', text: 'Sorry, something went wrong.' }]);
+        setMessages((prev) => [...prev, { from: 'assistant', text: 'Sorry, something went wrong.' }]);
       }
     } catch (err) {
-      const errorMessage = { from: 'ai', text: 'Error: ' + err.message };
+      const errorMessage = { from: 'assistant', text: 'Error: ' + err.message };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);

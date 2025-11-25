@@ -30,7 +30,7 @@ export default function ChatMessages({ messages, isLoading }) {
       style={{ scrollBehavior: 'smooth' }}
     >
       {messages.map((msg, index) => {
-        const isAI = msg.from === 'ai';
+        const isAI = msg.from === 'assistant';
         const refProps = !isAI ? { ref: lastUserRef } : {};
 
         return (
