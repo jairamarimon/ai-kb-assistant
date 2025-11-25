@@ -1,25 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
 
-export default function ChatInput({ onSend, disabled }) {
+export default function ChatInput({ onSend }) {
   const [message, setMessage] = useState('');
-  const textareaRef = useRef(null);
+
+  const isButtonDisabled = !message.trim();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (isButtonDisabled) return;
     onSend(message);
     setMessage('');
   };
-
-  // Auto-resize
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (el) {
-      el.style.height = 'auto';
-      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-    }
-  }, [message]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -31,16 +22,15 @@ export default function ChatInput({ onSend, disabled }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="border-t border-gray-300/40 flex items-center space-x-3 bg-white/95 p-4"
+      className="relative flex gap-3"
     >
-      <textarea
-        ref={textareaRef}
-        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-400 resize-none overflow-hidden text-sm box-border"
+      <input
+        type="text"
+        className="flex-1 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-sm border border-white/50 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent shadow-lg placeholder:text-gray-400 overflow-hidden"
         placeholder="Ask about cruises, destinations, or travel tips..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        disabled={disabled}
         style={{
           minHeight: '48px',
           maxHeight: '120px',
@@ -50,10 +40,13 @@ export default function ChatInput({ onSend, disabled }) {
 
       <button
         type="submit"
-        className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-400 hover:from-cyan-400 hover:to-cyan-300 text-white rounded-2xl shadow-lg transition-all transform hover:scale-105 active:scale-95"
-        disabled={disabled}
+        className="px-6 py-4 rounded-2xl bg-white text-[#007e95] hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        disabled={isButtonDisabled}
       >
-        <ArrowRight className="w-5 h-5" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m22 2-7 20-4-9-9-4Z"/>
+          <path d="M22 2 11 13"/>
+        </svg>
       </button>
     </form>
   );

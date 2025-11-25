@@ -50,7 +50,15 @@ export default function ChatPage() {
         <Header />
         <ChatContainer messages={messages} onSend={handleSend} isLoading={isLoading} />
         <footer className="mt-4 text-white text-sm opacity-75">
-          &copy; 2025 Shermans Travel Cruise Knowledge Base
+          &copy; 2025 Shermans Travel Cruise Knowledge Base — Built by{' '}
+          <a
+            href="https://github.com/jairamarimon"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-blue-300"
+          >
+            Jai
+          </a>
         </footer>
       </div>
     </main>

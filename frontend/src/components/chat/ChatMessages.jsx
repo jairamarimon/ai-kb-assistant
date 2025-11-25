@@ -26,7 +26,7 @@ export default function ChatMessages({ messages, isLoading }) {
   return (
     <div
       ref={containerRef}
-      className="flex-1 flex flex-col gap-4 p-4 overflow-y-auto"
+      className="chat-container flex-1 overflow-y-auto p-6 space-y-4"
       style={{ scrollBehavior: 'smooth' }}
     >
       {messages.map((msg, index) => {
@@ -43,13 +43,13 @@ export default function ChatMessages({ messages, isLoading }) {
             {isAI && (
               <>
                 <div
-                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md"
+                  className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center shadow-md"
                   style={{ background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
                 >
                   <Anchor className="size-5 text-blue-700" />
                 </div>
 
-                <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm prose prose-sm bg-white text-gray-700 border border-gray-100">
+                <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tl-sm prose bg-white/90 backdrop-blur-sm text-gray-700 shadow-lg">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                 </div>
               </>
@@ -58,15 +58,12 @@ export default function ChatMessages({ messages, isLoading }) {
             {/* USER MESSAGE */}
             {!isAI && (
               <>
-                <div
-                  className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm text-white prose prose-sm"
-                  style={{ background: '#06B6D4' }}
-                >
+                <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tr-sm text-gray-700 prose bg-white/90 backdrop-blur-sm shadow-lg">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
                 </div>
 
                 <div
-                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white shadow-md"
+                  className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md"
                   style={{ background: '#06B6D4' }}
                 >
                   <User className="size-5" />
