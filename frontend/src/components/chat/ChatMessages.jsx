@@ -51,6 +51,24 @@ export default function ChatMessages({ messages, isLoading }) {
 
                 <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-tl-sm prose bg-white/90 backdrop-blur-sm text-gray-700 shadow-lg">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                  {/* Sources used */}
+                  {msg.sources && msg.sources.length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-gray-200 text-xs text-gray-500">
+                      <span className="font-semibold">Sources used:</span>{' '}
+                      {msg.sources.map((src, i) => (
+                        <a
+                          key={i}
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-gray-700 text-gray-500"
+                        >
+                          {`Link ${i + 1}`}
+                          {i < msg.sources.length - 1 ? ', ' : ''}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             )}

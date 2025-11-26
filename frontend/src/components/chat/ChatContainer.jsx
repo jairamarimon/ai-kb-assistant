@@ -26,7 +26,7 @@ export default function ChatContainer({ messages, onSend, isLoading }) {
               onClick={() => handleQuickAction("What are your travel tips for a cruise?")}
               className="px-4 py-2 rounded-full bg-white text-[#007e95] hover:shadow-lg hover:scale-105 transition-all"
             >
-              Travel tips
+              Travel Tips
             </button>
 
             <button 
