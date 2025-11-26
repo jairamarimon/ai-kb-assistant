@@ -7,14 +7,23 @@ import { supabase } from "../services/supabase.js";
 
 const router = express.Router();
 
-// In-memory conversation history (for this session only)
+// In-memory conversation history
 let conversationHistory = [];
 const MAX_HISTORY = 10;
+
+// Simple in-memory cache for embeddings
+const embeddingCache = new Map();
 
 // Retrieve relevant chunks from Pinecone
 async function getRagContext(query, topK = 5) {
   const index = initPinecone();
-  const queryEmbedding = await createEmbedding(query);
+
+  // Use cached embedding if available
+  let queryEmbedding = embeddingCache.get(query);
+  if (!queryEmbedding) {
+    queryEmbedding = await createEmbedding(query);
+    embeddingCache.set(query, queryEmbedding);
+  }
 
   const response = await index.query({
     vector: queryEmbedding,
@@ -61,34 +70,30 @@ router.post("/", async (req, res) => {
 
   try {
     const { context, sources } = await getRagContext(query);
-    // Build the RAG prompt
+
+    // Build prompt with context
     const prompt = buildPrompt(query, conversationHistory, context);
     // Generate completion using OpenAI
     const answer = await createCompletion(prompt);
 
-    // Save chat to Supabase
-    const { data, error } = await supabase
-    .from("history")
-    .insert([{ question: query, answer, sources }])
-    .select();
-    
-    if (error) {
-      console.error("Error saving chat history:", error);
-    } else {
-      console.log("Chat history saved:", data);
-    }
-
     // Update in-memory conversation history
     conversationHistory.push({ role: "user", content: query });
     conversationHistory.push({ role: "assistant", content: answer });
-
-    // Keep only last N messages
     if (conversationHistory.length > MAX_HISTORY * 2) {
       conversationHistory = conversationHistory.slice(-MAX_HISTORY * 2);
     }
-  
-    res.json({success: true, answer, sources });
 
+    // Save chat to Supabase
+    supabase
+      .from("history")
+      .insert([{ question: query, answer, sources }])
+      .select()
+      .then(({ data, error }) => {
+        if (error) console.error("Supabase save error:", error);
+        else console.log("Chat history saved:", data);
+      });
+
+    res.json({ success: true, answer, sources });
   } catch (err) {
     console.error("Chat error:", err);
     res.status(500).json({ success: false, error: err.message });

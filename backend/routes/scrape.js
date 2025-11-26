@@ -36,6 +36,7 @@ const upsertBatches = async (index, vectors) => {
   }
 };
 
+// POST /scrape: Full ingestion pipeline
 router.post("/", async (req, res) => {
   try {
     // Initialize Pinecone
