@@ -11,6 +11,12 @@ const router = express.Router();
 let conversationHistory = [];
 const MAX_HISTORY = 10;
 
+// Only fetch RAG context for "meaningful" queries
+const isTrivialQuery = (query) => {
+  const trivial = ["hi", "hello", "hey", "yo", "sup"];
+  return trivial.includes(query.trim().toLowerCase());
+};
+
 // Simple in-memory cache for embeddings
 const embeddingCache = new Map();
 
@@ -69,7 +75,16 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    const { context, sources } = await getRagContext(query);
+    if (isTrivialQuery(query)) {
+      return res.json({
+        success: true,
+        answer:
+          "Hello! 👋 How can I help you with cruise destinations or travel planning today?",
+        sources: [],
+      });
+    }
+
+    const {context, sources } = await getRagContext(query);
 
     // Build prompt with context
     const prompt = buildPrompt(query, conversationHistory, context);
